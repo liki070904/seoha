@@ -74,8 +74,7 @@ def withdraw(driver, wait):
     click(driver, withdraw_reason)
     required_consent_check = driver.find_element(By.XPATH, '//*[@id="deleteAccount"]/form/fieldset/div/div/div[4]/div/label')
     driver.execute_script("arguments[0].focus();", required_consent_check)
-    time.sleep(5)
-
+    time.sleep(1)
     check_required_consents = driver.find_elements(By.XPATH, '//*[@id="deleteAccount"]/form/fieldset/div/div/div[3]/ul/li')
     time.sleep(1)
     check_box = driver.find_element(By.TAG_NAME, 'input')
@@ -84,3 +83,14 @@ def withdraw(driver, wait):
             time.sleep(0.5)
             click(driver, check_box)
     click(driver,required_consent_check)
+
+# 문학동네 > 회원탈퇴
+def withdraw_confirm(driver, wait):
+    withdraw_confirm = driver.find_element(By.XPATH, '//*[@id="deleteAccount"]/div[2]/button[2]')
+    click(driver, withdraw_confirm)
+    time.sleep(2)
+    confirm = driver.find_element(By.XPATH, '//*[@id="systemAlert"]/div[2]/div[2]/button[2]')
+    click(driver, confirm)
+    time.sleep(2)
+    finished = driver.find_element(By.XPATH, '//*[@id="systemAlert"]/div[2]/div[2]/button')
+    click(driver,finished)
