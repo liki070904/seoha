@@ -5,16 +5,18 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 # 드라이버 설정
 def setup_driver():
-    # WebDriver 설정 코드
+    # Chrome WebDriver 설정
     options = webdriver.ChromeOptions()
     options.add_argument('--start-maximized')
-    options.add_argument('--disable-gpu')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument("--force-device-scale-factor=1.2")
     options.add_argument('--ignore-certificate-errors')
     options.add_experimental_option('excludeSwitches', ['enable-logging'])
+
+    # WebDriver 실행
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=options)
-    driver.implicitly_wait = WebDriverWait(driver, 10)
+
+    # 대기 설정
+    driver.implicitly_wait = (10)
     wait = WebDriverWait(driver, 10)
     return driver, wait

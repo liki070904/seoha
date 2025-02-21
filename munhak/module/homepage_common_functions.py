@@ -5,6 +5,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger()
 def some_function():
     logging.info("some_function 호출됨")
 # 요소가 보이는 영역 안에 있도록 스크롤하는 함수
@@ -34,21 +35,31 @@ def close_popup(driver, wait, popup_id, close_button_locator):
     time.sleep(2)
 # 문학동네 홈페이지 진입
 def home_page(driver, wait, homepage_url):
-    driver.get(homepage_url)
-    wait.until(lambda driver: driver.execute_script('return document.readyState') == 'complete')
-    time.sleep(1)
-    close_popup(driver, wait, 'popMainLayer1', (By.XPATH, '//*[@id="popMainLayer1"]/div/div[2]/button[1]'))
-    time.sleep(1)
+    try:
+        driver.get(homepage_url)
+        wait.until(lambda driver: driver.execute_script('return document.readyState') == 'complete')
+        time.sleep(1)
+        close_popup(driver, wait, 'popMainLayer1', (By.XPATH, '//*[@id="popMainLayer1"]/div/div[2]/button[1]'))
+        time.sleep(2)
+        logger.info("문학동네 홈페이지 진입 성공")
+    except Exception as e:
+        logging.error(f"문학동네 홈페이지 진입 테스트 중 오류가 발생했습니다: {str(e)}")
+        return
 # 문학동네 로그인
 def munhak_login(driver, wait, user_id, user_pw):
-    login_link = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "a.ico_login[href='/login?joinChannelType=HOMEPAGE']")))
-    click(driver, login_link)
-    time.sleep(1)
-    driver.find_element(By.ID, "userId").send_keys(user_id)
-    driver.find_element(By.ID, "userPw").send_keys(user_pw)
-    login_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.btn.fill_black")))
-    click(driver, login_button)
-    time.sleep(1)
+    try:
+        login_link = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "a.ico_login[href='/login?joinChannelType=HOMEPAGE']")))
+        click(driver, login_link)
+        time.sleep(1)
+        driver.find_element(By.ID, "userId").send_keys(user_id)
+        driver.find_element(By.ID, "userPw").send_keys(user_pw)
+        login_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.btn.fill_black")))
+        click(driver, login_button)
+        time.sleep(1)
+        logger.info("문학동네 로그인 성공")
+    except Exception as e:
+        logging.error(f"로그인 테스트 중 오류가 발생했습니다: {str(e)}")
+        return
 # 문학동네 > 마이페이지 진입
 def munhak_mypage(driver, wait):
     mypage = driver.find_element(By.XPATH, '//*[@id="header"]/div[1]/div/ul[2]/li[2]/a')
@@ -83,7 +94,6 @@ def withdraw(driver, wait):
             time.sleep(0.5)
             click(driver, check_box)
     click(driver,required_consent_check)
-
 # 문학동네 > 회원탈퇴
 def withdraw_confirm(driver, wait):
     withdraw_confirm = driver.find_element(By.XPATH, '//*[@id="deleteAccount"]/div[2]/button[2]')
