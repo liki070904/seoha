@@ -2,7 +2,6 @@ import time, logging
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -76,21 +75,11 @@ def withdraw(driver, wait):
     required_consent_check = driver.find_element(By.XPATH, '//*[@id="deleteAccount"]/form/fieldset/div/div/div[4]/div/label')
     driver.execute_script("arguments[0].focus();", required_consent_check)
     time.sleep(5)
-    #
-    # check_required_consents = driver.find_elements(By.XPATH, '//*[@id="deleteAccount"]/form/fieldset/div/div/div[3]/ul/li')
-    # time.sleep(1)
-    # for i in check_required_consents:
-    #     check_box = i.find_element(By.TAG_NAME, 'input')
-    #     if not check_box.is_selected():
-    #         time.sleep(0.5)
-    #         click(driver, check_box)
-    # click(driver,required_consent_check)
 
     check_required_consents = driver.find_elements(By.XPATH, '//*[@id="deleteAccount"]/form/fieldset/div/div/div[3]/ul/li')
     time.sleep(1)
     check_box = driver.find_element(By.TAG_NAME, 'input')
     for check_box in check_required_consents:
-        print(f"{check_box}")
         if not check_box.is_selected():
             time.sleep(0.5)
             click(driver, check_box)
