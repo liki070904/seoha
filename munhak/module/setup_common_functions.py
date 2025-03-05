@@ -8,7 +8,7 @@ def setup_driver():
     # Chrome WebDriver 설정
     options = webdriver.ChromeOptions()
     options.add_argument('--start-maximized')
-    options.add_argument("--force-device-scale-factor=1.2")
+    options.add_argument("--force-device-scale-factor=0.9")
     options.add_argument('--ignore-certificate-errors')
     options.add_experimental_option('excludeSwitches', ['enable-logging'])
 
