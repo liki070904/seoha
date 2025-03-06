@@ -25,7 +25,8 @@ def iframe(driver, wait):
     driver.switch_to.frame(iframe)
 
 # 관리자 URL
-manager_url = "https://devfss.hanatourbiz.com/login"
+devmanager_url = "https://devfss.hanatourbiz.com/login"
+manager_url = "https://fss.hanatourbiz.com/login"
 def manager_open(driver, wait):
     try:
         # 메인 페이지 접속

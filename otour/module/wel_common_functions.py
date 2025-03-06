@@ -18,7 +18,8 @@ def click(driver, element):
     actions.move_to_element_with_offset(element, 5, 5)  # 버튼의 (5, 5) 위치로 이동
     actions.click().perform()
 # 복지몰 URL
-homepage_url = "https://devwel.hanabizwel.com"
+devhomepage_url = "https://devwel.hanabizwel.com"
+homepage_url = "https://wel.hanabizwel.com"
 def homepage_open(driver, wait):
     try:
         driver.get(homepage_url)
