@@ -2,27 +2,20 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
+from otour.module.setup_common_functions import (click)
 import logging, time
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger()
-def some_function():
-    logging.info("some_function 호출됨")
-# 요소가 보이는 영역 안에 있도록 스크롤하는 함수
-def scroll_into_view(driver, element):
-    driver.execute_script("arguments[0].scrollIntoView(true);", element)
-# 클릭
-def click(driver, element):
-    actions = ActionChains(driver)
-    actions.move_to_element_with_offset(element, 5, 5)  # 버튼의 (5, 5) 위치로 이동
-    actions.click().perform()
 # 복지몰 URL
 devhomepage_url = "https://devwel.hanabizwel.com"
 homepage_url = "https://wel.hanabizwel.com"
+
 def homepage_open(driver, wait):
     try:
-        driver.get(homepage_url)
+        driver.get(devhomepage_url)
         wait.until(lambda driver: driver.execute_script('return document.readyState') == 'complete')
         time.sleep(2)
         logger.info("복지몰 페이지 열기 성공")
@@ -53,16 +46,16 @@ def travel_products_package(driver, wait, travel_products, travel_city, travel_a
     try:
         # 1depth 클릭
         travel_products = wait.until(EC.element_to_be_clickable((By.XPATH, f"//a[text()='{travel_products}']")))
-        click(driver,travel_products)
-        time.sleep(1)
+        travel_products.click()
+
         # 2depth 클릭
         travel_city = wait.until(EC.element_to_be_clickable((By.XPATH, f"//a[text()='{travel_city}']")))
-        click(driver, travel_city)
-        time.sleep(1)
+        travel_city.click()
+
         # 3depth 클릭
         travel_area = wait.until(EC.element_to_be_clickable((By.XPATH, f"//a[text()='{travel_area}']")))
-        click(driver, travel_area)
-        time.sleep(1)
+        travel_area.click()
+
         logger.info("패키지 클릭 성공")
     except Exception as e:
         logging.error(f"패키지 클릭 테스트 중 오류가 발생했습니다: {str(e)}")
@@ -151,7 +144,6 @@ def reservation_info(driver, wait, name_input, birth_input, email_input, phone_i
         logger.info("예약자 정보 입력 성공")
     except Exception as e:
         logging.error(f"예약자 정보 입력 테스트 중 오류가 발생했습니다: {str(e)}")
-
 # 트윈 옵션 추가 & 메모 입력
 def add_twin_option(driver, wait, memo):
     try:
@@ -205,8 +197,8 @@ def click_payment(driver, wait):
         logging.error(f"포인트로 결제하기 테스트 중 오류가 발생했습니다: {str(e)}")
         return
 # 공급사 태그 클릭  한진 : HJ / 롯데 : LO / 하나 : HN / 모두 : MO
-def select_supplier(driver, wait, scode):
-    supplier_checkbox = wait.until(EC.element_to_be_clickable((By.XPATH, f'//*[@id="{scode}"]')))
+def select_supplier(driver, wait, value):
+    supplier_checkbox = wait.until(EC.element_to_be_clickable((By.XPATH, f'//*[@value="{value}"]')))
     click(driver, supplier_checkbox)
     time.sleep(1)
 # 상품 선택
@@ -449,4 +441,30 @@ def click_my_travel(driver, wait):
         logger.info("마이페이지 이동 성공")
     except Exception as e:
         logging.error(f"마이페이지 이동 테스트 중 오류가 발생했습니다: {str(e)}")
+        return
+# 마이페이지 > 취소요청
+def my_cancel_request(driver, wait, name, phoneNm):
+    try:
+        # 취소요청 클릭
+        time.sleep(1)
+        cancel_request = driver.find_element(By.XPATH, '//*[@id="container"]/div/div/div[2]/div[2]/div/div[1]/ul/li[1]/div[2]/div[2]/a')
+        click(driver, cancel_request)
+        time.sleep(1)
+        # 접수자 입력
+        driver.find_element(By.XPATH, '//*[@id="cancelerNm"]').send_keys(name)
+        # 접수자 연락처 입력
+        driver.find_element(By.XPATH, '//*[@id="cancelerTel"]').send_keys(phoneNm)
+        # 동의접수 클릭
+        time.sleep(1)
+        receipt = driver.find_element(By.XPATH, '//*[@id="cancelRequestPop"]/div[2]/div[3]/button')
+        click(driver, receipt)
+        confirm = driver.find_element(By.XPATH, '/html/body/div[18]/div/div[6]/button[1]')
+        click(driver, confirm)
+        actions = ActionChains(driver)
+        actions.send_keys(Keys.SPACE).perform()
+        # reconfirm = driver.find_element(By.XPATH, '/html/body/div[18]/div/div[6]/button[1]')
+        # click(driver, reconfirm)
+        logger.info("마이페이지 취소 요청 성공")
+    except Exception as e:
+        logging.error(f"마이페이지 취소 요청 테스트 중 오류가 발생했습니다: {str(e)}")
         return

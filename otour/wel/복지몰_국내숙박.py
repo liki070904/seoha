@@ -1,32 +1,28 @@
-import logging, os, pyautogui, sys, time
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.abspath(os.path.join(current_dir, '..', '..'))
-if parent_dir not in sys.path:
-    sys.path.append(parent_dir)
+import logging, pyautogui
 # setup
-from otour.module.setup_common_functions import (setup_driver)
+from otour.module.setup_common_functions import (setup_driver, get_current_dir, get_parent_dir, scroll_to_bottom, iframe, cancel_iframe)
 # manager
 from otour.module.manager_common_functions import (
-    some_function, manager_open, manager_login, channel_reserve_management, click_channel_option, click_search_reserve_detail,
-    scroll_to_bottom, payment_info)
+    manager_open, manager_login, channel_reserve_management, click_channel_option, click_search_reserve_detail,
+    payment_info, channel_cancel_management, cancel_request_info, status_cancel,
+    save_to_cancel_info, payback_request)
 # wel
 from otour.module.wel_common_functions import (
     homepage_open, login, travel_products_domestic, low_price, click_product, change_date, immediate_payment, reservation_info,
-    add_twin_option,
-    agree_conditions, complete_reservation, check_reservation, navigate_to_reservation_list, process_payment,
-    complete_payment, click_my_travel, point_pay, click_payment)
+    add_twin_option, my_cancel_request,
+    agree_conditions, check_reservation, navigate_to_reservation_list, point_pay, click_payment)
 # log
 logger = logging.getLogger()
+# path
+current_dir = get_current_dir()
+parent_dir = get_parent_dir(2)
+
+# 복지몰 홈페이지 입력
+# ID 입력  개발:otourtest, seohaqa / 운영:sbrr103   /   포스코이앤씨 : seoha
+# 비밀번호 입력  개발 : cjmall2$, rhaoddl1143! / 운영 : cj011992???
 
 def main():
     driver, wait = setup_driver()
-    some_function()
-
-    # 복지몰 홈페이지 입력
-    # driver.get("https://wel.hanabizwel.com/")   #운영
-    # ID 입력  개발:otourtest, seohaqa / 운영:sbrr103   /   포스코이앤씨 : seoha
-    # 비밀번호 입력  개발 : cjmall2$, rhaoddl1143! / 운영 : cj011992???
-
     # 복지몰 URL
     homepage_open(driver, wait)
     # 로그인
@@ -66,12 +62,37 @@ def main():
     manager_login(driver, wait, "wlocos", "hanabiz!@#", "2")
     # 예약조회 진입
     channel_reserve_management(driver, wait)
+    # iframe 전환
+    iframe(driver, wait)
     # 채널 선택  (오투어 : channelSeqArr1 / 복지몰 : channelSeqArr2 / 삼성전기 : channelSeqArr10)
     click_channel_option(driver, wait, "channelSeqArr2")
     # 예약 상세 진입
     click_search_reserve_detail(driver, wait)
     # 결제정보 탭 진입
+    iframe(driver,wait)
     payment_info(driver, wait)
+    # 복지몰 탭 이동
+    driver.switch_to.window(driver.window_handles[1])
+    # 취소요청
+    my_cancel_request(driver, wait, "이서하", "01022077353")
+    # 관리자 탭 이동
+    driver.switch_to.window(driver.window_handles[2])
+    # 메인 iframe 전환
+    driver.switch_to.default_content()
+    # 복지몰 취소요청 진입
+    channel_cancel_management(driver, wait)
+    # iframe 전환
+    cancel_iframe(driver,wait)
+    # 취소요청건 진입
+    cancel_request_info(driver, wait)
+    # 결제정보 탭 이동
+    payment_info(driver, wait)
+    # 환불요청
+    payback_request(driver, wait, "test")
+    # 예약정보 > 상태값 취소 변경
+    status_cancel(driver, wait)
+    # 취소정보 저장
+    save_to_cancel_info(driver, wait)
     # test_exit
     pyautogui.confirm(title = 'complete', text = '테스트 완료')
 
