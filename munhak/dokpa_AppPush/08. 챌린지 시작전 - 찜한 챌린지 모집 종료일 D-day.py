@@ -1,10 +1,6 @@
-import os, pyautogui, sys
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.abspath(os.path.join(current_dir, '..', '..'))
-if parent_dir not in sys.path:
-    sys.path.append(parent_dir)
+import pyautogui, logging
     # setup
-from munhak.module.setup_common_functions import (setup_driver)
+from munhak.module.setup_common_functions import (setup_driver, get_current_dir, get_parent_dir)
     # admin
 from munhak.module.admin_common_functions import (
     admin_login, choice_book, challenge_detail, Recruitment_period, challenge_period, search_mate, challenge_save,
@@ -15,6 +11,12 @@ from munhak.module.homepage_common_functions import (
     # dokpa
 from munhak.module.dokpa_common_functions import (
     dokpa_enter,  all_challenge_apply, challenge_apply_wishlist)
+
+# log
+logger = logging.getLogger()
+# path
+current_dir = get_current_dir()
+parent_dir = get_parent_dir(2)
 
 def main():
     driver, wait = setup_driver()

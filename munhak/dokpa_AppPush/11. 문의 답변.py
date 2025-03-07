@@ -1,10 +1,6 @@
-import logging, os, pyautogui, sys
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.abspath(os.path.join(current_dir, '..', '..'))
-if parent_dir not in sys.path:
-    sys.path.append(parent_dir)
+import logging, pyautogui
     # setup
-from munhak.module.setup_common_functions import (setup_driver)
+from munhak.module.setup_common_functions import (setup_driver, get_current_dir, get_parent_dir)
     # admin
 from munhak.module.admin_common_functions import (
     admin_login, site_management_tab, iframe, inquiry_register, answer_inquiry, answerYN, save_inquiry)
@@ -14,7 +10,12 @@ from munhak.module.homepage_common_functions import (
     # dokpa
 from munhak.module.dokpa_common_functions import (
     dokpa_enter, my_dokpa, my_dokpa_setting, my_dokpa_one_on_one)
+
+# log
 logger = logging.getLogger()
+# path
+current_dir = get_current_dir()
+parent_dir = get_parent_dir(2)
 
 # 관리자 url, 계정
 admin_homepage_url = "https://dev-munhak-manager.ntoday.kr/login"
