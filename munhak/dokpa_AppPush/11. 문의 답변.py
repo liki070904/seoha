@@ -10,24 +10,23 @@ from munhak.module.admin_common_functions import (
     admin_login, site_management_tab, iframe, inquiry_register, answer_inquiry, answerYN, save_inquiry)
     # homepage
 from munhak.module.homepage_common_functions import (
-    home_page, munhak_login, some_function)
+    home_page, munhak_login)
     # dokpa
 from munhak.module.dokpa_common_functions import (
-    dokpa_enter, some_function, my_dokpa, my_dokpa_setting, my_dokpa_one_on_one)
+    dokpa_enter, my_dokpa, my_dokpa_setting, my_dokpa_one_on_one)
 logger = logging.getLogger()
+
+# 관리자 url, 계정
+admin_homepage_url = "https://dev-munhak-manager.ntoday.kr/login"
+admin_id = "soyeonkim01"
+admin_pw = "7$f41OpW"
+# 홈페이지 url, 계정
+homepage_url = "https://dev-munhak-home.ntoday.kr/"
+user_id = "seoha40@ntoday.kr"
+user_pw = "admin123"
 
 def main():
     driver, wait = setup_driver()
-    some_function()
-
-    # 관리자 url, 계정
-    admin_homepage_url = "https://dev-munhak-manager.ntoday.kr/login"
-    admin_id = "soyeonkim01"
-    admin_pw = "7$f41OpW"
-    # 홈페이지 url, 계정
-    homepage_url = "https://dev-munhak-home.ntoday.kr/"
-    user_id = "seoha40@ntoday.kr"
-    user_pw = "admin123"
 
     # 문학동네 홈페이지 진입
     home_page(driver, wait, homepage_url)

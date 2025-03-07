@@ -12,15 +12,14 @@ from munhak.module.admin_common_functions import (
     top_challenge,challenge_edit,generate_date_range, challenge_tab, challenge_register)
     # homepage
 from munhak.module.homepage_common_functions import (
-    home_page, munhak_login, some_function)
+    home_page, munhak_login)
     # dokpa
 from munhak.module.dokpa_common_functions import (
-    dokpa_enter, some_function, all_challenge_apply, myBookmark_mate, same_challenge_name_value)
+    dokpa_enter, all_challenge_apply, myBookmark_mate, same_challenge_name_value)
 logger = logging.getLogger()
 
 def main():
     driver, wait = setup_driver()
-    some_function()
 
     # 날짜 지정 함수 호출
     date_info = generate_date_range(min_days=-1, max_days=3)

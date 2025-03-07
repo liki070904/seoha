@@ -1,41 +1,14 @@
 import time, logging
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from datetime import datetime, timedelta
+from munhak.module.setup_common_functions import (click,iframe)
 
-# iframe
-def iframe(driver, wait):
-    iframe = driver.find_element(By.XPATH, '//*[@id="myTabbar"]/div/div/div[3]/div/iframe')
-    driver.switch_to.frame(iframe)
 # 로깅 설정
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger()
-def some_function():
-    logging.info("some_function 호출됨")
-# 클릭
-def click(driver, element):
-    actions = ActionChains(driver)
-    actions.move_to_element_with_offset(element, 5, 5)  # 버튼의 (5, 5) 위치로 이동
-    actions.click().perform()
-# 요소가 보이는 영역 안에 있도록 스크롤하는 함수
-def scroll_into_view(driver, element):
-    driver.execute_script("arguments[0].scrollIntoView(true);", element)
-# 팝업 닫기 함수
-def close_popup(driver, wait, popup_id, close_button_locator):
-    try:
-        popup_exists = driver.execute_script(f"return document.getElementById('{popup_id}') !== null;")
-        if popup_exists:
-            close_button = wait.until(EC.presence_of_element_located(close_button_locator))
-            scroll_into_view(driver, close_button)
-            click(driver, close_button)
-            print("팝업 닫기 완료")
-        else:
-            print("팝업이 존재하지 않습니다.")
-    except Exception as e:
-        print(f"팝업 닫기 중 오류 발생: {e}")
-    time.sleep(2)
+
 # 관리자 로그인
 def admin_login(driver, admin_homepage_url, admin_id, admin_pw):
     try:
@@ -506,7 +479,6 @@ def answerYN(driver, wait):
     except Exception as e:
         logging.error(f"답변여부 : 답변완료 변경 테스트 중 오류가 발생했습니다: {str(e)}")
         return
-
 # 관리자 > 문의 저장
 def save_inquiry(driver, wait):
     try:

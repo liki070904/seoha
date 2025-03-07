@@ -11,14 +11,14 @@ from munhak.module.admin_common_functions import (
     challenge_save, choice_challenge, challenge_edit, generate_date_range, challenge_tab, challenge_register)
     # homepage
 from munhak.module.homepage_common_functions import (
-    home_page, munhak_login, some_function)
+    home_page, munhak_login)
     # dokpa
 from munhak.module.dokpa_common_functions import (
-    dokpa_enter, some_function,  commingsoon_challenge_apply, comming_soon)
+    dokpa_enter, commingsoon_challenge_apply, comming_soon)
 
 def main():
     driver, wait = setup_driver()
-    some_function()
+
     # 날짜 지정 함수 호출
     date_info = generate_date_range(min_days=0, max_days=3)
     start_date = date_info['start_date']
