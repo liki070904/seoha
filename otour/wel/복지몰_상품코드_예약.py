@@ -7,7 +7,7 @@ from otour.module.manager_common_functions import (
     check_reservation_status)
 # wel
 from otour.module.homepage_common_functions import (
-    wel_homepage_open, wel_login, travel_products_package, select_supplier, select_product, fill_reservation_form, input_traveler_info,
+    wel_homepage_open, wel_product_homepage_open, wel_login, fill_reservation_form, input_traveler_info,
     complete_reservation, check_reservation, navigate_to_reservation_list, process_payment, complete_payment, click_my_travel)
 # log
 logger = logging.getLogger()
@@ -25,13 +25,9 @@ def main():
     # 복지몰 URL
     wel_homepage_open(driver, wait)
     # 로그인
-    wel_login(driver, wait, "seohaqa", "rhaoddl1143!")
-    # 패키지 선택
-    travel_products_package(driver, wait, "해외패키지", "동남아/대만/서남아", "방콕/파타야")
-    # 공급사 태그 클릭 -> 한진 : HJ / 롯데 : LO / 하나 : HN / 모두 : MO
-    select_supplier(driver, wait, "LO")
-    # 상품 선택
-    select_product(driver, wait)
+    wel_login(driver, wait, "otourtest", "cjmall2$")
+    # 상품코드 URL
+    wel_product_homepage_open(driver, wait)
     # 예약하기 버튼 클릭
     fill_reservation_form(driver, wait)
     # 여행자 정보 입력

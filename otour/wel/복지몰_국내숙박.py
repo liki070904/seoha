@@ -7,8 +7,8 @@ from otour.module.manager_common_functions import (
     payment_info, channel_cancel_management, cancel_request_info, status_cancel,
     save_to_cancel_info, payback_request)
 # wel
-from otour.module.wel_common_functions import (
-    homepage_open, login, travel_products_domestic, low_price, click_product, change_date, immediate_payment, reservation_info,
+from otour.module.homepage_common_functions import (
+    wel_homepage_open, wel_login, travel_products_domestic, low_price, click_product, change_date, immediate_payment, reservation_info,
     add_twin_option, my_cancel_request,
     agree_conditions, check_reservation, navigate_to_reservation_list, point_pay, click_payment)
 # log
@@ -24,9 +24,9 @@ parent_dir = get_parent_dir(2)
 def main():
     driver, wait = setup_driver()
     # 복지몰 URL
-    homepage_open(driver, wait)
+    wel_homepage_open(driver, wait)
     # 로그인
-    login(driver, wait, "seohaqa", "rhaoddl1143!")
+    wel_login(driver, wait, "seohaqa", "rhaoddl1143!")
     # 국내숙박 선택
     travel_products_domestic(driver, wait)
     # 낮은 가격순 필터 선택

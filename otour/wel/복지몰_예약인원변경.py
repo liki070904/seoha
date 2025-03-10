@@ -7,8 +7,9 @@ from otour.module.manager_common_functions import (
     check_reservation_status)
 # wel
 from otour.module.homepage_common_functions import (
-    wel_homepage_open, wel_login, travel_products_package, select_supplier, select_product, fill_reservation_form, input_traveler_info,
-    complete_reservation, check_reservation, navigate_to_reservation_list, process_payment, complete_payment, click_my_travel)
+    wel_homepage_open, wel_login, travel_products_package, select_supplier, select_product, add_reservation_person, fill_reservation_form,
+    input_traveler_info, input_traveler_info2, input_traveler_info3, complete_reservation, check_reservation, navigate_to_reservation_list,
+    process_payment, complete_payment, click_my_travel)
 # log
 logger = logging.getLogger()
 # path
@@ -32,10 +33,16 @@ def main():
     select_supplier(driver, wait, "LO")
     # 상품 선택
     select_product(driver, wait)
+    # 인원 추가
+    add_reservation_person(driver, wait, adult_count=0, child_count=1, infant_count=1)
     # 예약하기 버튼 클릭
     fill_reservation_form(driver, wait)
     # 여행자 정보 입력
     input_traveler_info(driver, wait, "테스트", "19880728", "seoha.lee@ntoday.kr","01022077353", "LEE", "SEOHA")
+    # 아동 정보 입력
+    input_traveler_info2(driver, wait, "테스트아동", "20150101", "LEE", "SEOHA")
+    # 유아 정보 입력
+    input_traveler_info3(driver, wait, "테스트유아", "20250101", "LEE", "SEOHA")
     # 예약 버튼 클릭
     complete_reservation(driver, wait)
     # 예약내역 확인 클릭

@@ -10,37 +10,88 @@ import logging, time
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger()
 # 복지몰 URL
-devhomepage_url = "https://devwel.hanabizwel.com"
-homepage_url = "https://wel.hanabizwel.com"
+dev_wel_homepage_url = "https://devwel.hanabizwel.com"
+wel_homepage_url = "https://wel.hanabizwel.com"
+# 오투어 URL
+dev_otour_homepage_url = "https://devotour.cjonstyle.com/"
+otour_homepage_url = "https://otour.cjonstyle.com/"
+# 오투어 상품코드 URL
+otour_product_homepage_url = "https://devotour.cjonstyle.com/pages/overseas/package/detail/OP20250221187/HJ"
+# 복지몰 상품코드 URL
+wel_product_homepage_url = "https://devwel.hanabizwel.com/pages/overseas/package/detail/OP20250613772/HJ"
 
-def homepage_open(driver, wait):
+# 복지몰 오픈
+def wel_homepage_open(driver, wait):
     try:
-        driver.get(devhomepage_url)
+        driver.get(wel_homepage_url)
         wait.until(lambda driver: driver.execute_script('return document.readyState') == 'complete')
         time.sleep(2)
         logger.info("복지몰 페이지 열기 성공")
     except Exception as e:
         logging.error(f"복지몰 페이지 열기 테스트 중 오류가 발생했습니다: {str(e)}")
-# 로그인
-def login(driver, wait, user_id, user_pw):
+# 오투어 오픈
+def otour_homepage_open(driver, wait):
+    try:
+        driver.get(dev_otour_homepage_url)
+        wait.until(lambda driver: driver.execute_script('return document.readyState') == 'complete')
+        time.sleep(2)
+        logger.info("오투어 페이지 열기 성공")
+    except Exception as e:
+        logging.error(f"복지몰 페이지 열기 테스트 중 오류가 발생했습니다: {str(e)}")
+# 오투어 상품코드 오픈
+def otour_product_homepage_open(driver, wait):
+    try:
+        driver.get(otour_product_homepage_url)
+        wait.until(lambda driver: driver.execute_script('return document.readyState') == 'complete')
+        time.sleep(2)
+        logger.info("오투어 페이지 열기 성공")
+    except Exception as e:
+        logging.error(f"복지몰 페이지 열기 테스트 중 오류가 발생했습니다: {str(e)}")
+# 복지몰 상품코드 오픈
+def wel_product_homepage_open(driver, wait):
+    try:
+        driver.get(wel_product_homepage_url)
+        wait.until(lambda driver: driver.execute_script('return document.readyState') == 'complete')
+        time.sleep(2)
+        logger.info("오투어 페이지 열기 성공")
+    except Exception as e:
+        logging.error(f"복지몰 페이지 열기 테스트 중 오류가 발생했습니다: {str(e)}")
+# 복지몰 로그인
+def wel_login(driver, wait, user_id, user_pw):
     try:
         # 로그인 버튼 클릭
         login_link = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "a[href*='login']")))
         click(driver, login_link)
-        time.sleep(2)
+        time.sleep(1)
         # ID 입력  개발:otourtest / 운영:sbrr103   /   포스코이앤씨 : seoha
         driver.find_element(By.ID, "idSet").send_keys(user_id)
         driver.find_element(By.ID, "passwordSet").send_keys(user_pw)
-        time.sleep(1)
         # 로그인 버튼 클릭
         login_button = wait.until(EC.element_to_be_clickable((By.ID, "memberLoginBtn")))
         click(driver, login_button)
-        time.sleep(1)
         logger.info("로그인 성공")
     except Exception as e:
         logging.error(f"로그인 테스트 중 오류가 발생했습니다: {str(e)}")
         return
     time.sleep(1)
+# 오투어 로그인
+def otour_login(driver, wait, user_id, user_pw):
+    try:
+        # 로그인 버튼 클릭
+        login_link = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "a[href*='login']")))
+        click(driver, login_link)
+        time.sleep(1)
+        # ID 입력  개발:otourtest / 운영:sbrr103   /   포스코이앤씨 : seoha
+        driver.find_element(By.XPATH, "//*[@id='id_input']").send_keys(user_id)
+        driver.find_element(By.XPATH, "//*[@id='password_input']").send_keys(user_pw)
+        # 로그인 버튼 클릭
+        login_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//*[@id='loginSubmit']")))
+        click(driver, login_button)
+        logger.info("로그인 성공")
+        time.sleep(1)
+    except Exception as e:
+        logging.error(f"로그인 테스트 중 오류가 발생했습니다: {str(e)}")
+        return
 # 패키지 클릭
 def travel_products_package(driver, wait, travel_products, travel_city, travel_area):
     try:
@@ -198,9 +249,13 @@ def click_payment(driver, wait):
         return
 # 공급사 태그 클릭  한진 : HJ / 롯데 : LO / 하나 : HN / 모두 : MO
 def select_supplier(driver, wait, value):
-    supplier_checkbox = wait.until(EC.element_to_be_clickable((By.XPATH, f'//*[@value="{value}"]')))
-    click(driver, supplier_checkbox)
-    time.sleep(1)
+    try:
+        supplier_checkbox = wait.until(EC.element_to_be_clickable((By.XPATH, f'//*[@value="{value}"]')))
+        click(driver, supplier_checkbox)
+        time.sleep(1)
+        logger.info("공급사 선택 성공")
+    except Exception as e:
+        logging.error(f"공급사 선택 테스트 중 오류가 발생했습니다: {str(e)}")
 # 상품 선택
 def select_product(driver, wait):
     try:
@@ -260,14 +315,18 @@ def select_product(driver, wait):
         return
 # 예약하기 버튼 클릭
 def fill_reservation_form(driver, wait):
-    reserve_button = wait.until(EC.presence_of_element_located((By.XPATH, "//a[@id='btnreservation']")))
-    click(driver, reserve_button)
-    time.sleep(1)
-    agree_checkbox = driver.find_element(By.XPATH, '//*[@id="container"]/div/div/div/div[2]/div[1]/div[2]/div[1]/div/div')
-    click(driver, agree_checkbox)
-    time.sleep(1)
-    driver.execute_script("window.scrollBy(0, 800);")
-    time.sleep(1)
+    try:
+        reserve_button = wait.until(EC.presence_of_element_located((By.XPATH, "//a[@id='btnreservation']")))
+        click(driver, reserve_button)
+        time.sleep(1)
+        agree_checkbox = driver.find_element(By.XPATH, '//*[@id="container"]/div/div/div/div[2]/div[1]/div[2]/div[1]/div/div')
+        click(driver, agree_checkbox)
+        time.sleep(1)
+        driver.execute_script("window.scrollBy(0, 800);")
+        time.sleep(1)
+        logger.info("예약하기 버튼 클릭 성공")
+    except Exception as e:
+        logging.error(f"예약하기 버튼 클릭 테스트 중 오류가 발생했습니다: {str(e)}")
 # 성인 정보 입력
 def input_traveler_info(driver, wait, name_input, birth_input, email_input, phone_input, eng_lastname, eng_firstname):
     try:
@@ -340,8 +399,8 @@ def input_traveler_info3(driver, wait, name_input, birth_input, eng_lastname, en
 # 예약 버튼 클릭
 def complete_reservation(driver, wait):
     try:
-        reserve_button = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "a#btnbook.btn.btn_lg.fill_primary.w100p")))
-        click(driver, reserve_button)
+        reserve_complete_button = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "a#btnbook.btn.btn_lg.fill_primary.w100p")))
+        click(driver, reserve_complete_button)
         time.sleep(1)
         logger.info("예약 버튼 클릭 성공")
     except Exception as e:
