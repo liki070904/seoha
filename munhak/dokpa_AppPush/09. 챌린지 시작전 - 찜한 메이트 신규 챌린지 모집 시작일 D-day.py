@@ -27,18 +27,8 @@ def main():
     start_date = date_info['start_date']
     dates_list = date_info['dates_list']
 
-    # 관리자 url, 계정
-    admin_homepage_url = "https://dev-munhak-manager.ntoday.kr/login"
-    admin_id = "soyeonkim01"
-    admin_pw = "7$f41OpW"
-
-    # 홈페이지 url, 계정
-    homepage_url = "https://dev-munhak-home.ntoday.kr/"
-    user_id = "seoha40@ntoday.kr"
-    user_pw = "admin123"
-
     # 관리자 로그인
-    admin_login(driver, admin_homepage_url, admin_id, admin_pw)
+    admin_login(driver, "soyeonkim01", "7$f41OpW")
 
     # 관리자 챌린지 탭 진입
     challenge_tab(driver,wait)
@@ -73,10 +63,10 @@ def main():
     # 문학동네 홈페이지 진입
     driver.execute_script("window.open('');")
     driver.switch_to.window(driver.window_handles[-1])
-    home_page(driver, wait, homepage_url)
+    home_page(driver, wait)
 
     # 문학동네 로그인
-    munhak_login(driver, wait, user_id, user_pw)
+    munhak_login(driver, wait, "seoha40@ntoday.kr", "admin123")
 
     # 독파 진입 및 팝업 닫기 함수
     dokpa_enter(driver, wait)

@@ -8,9 +8,10 @@ from munhak.module.setup_common_functions import (click,iframe)
 # 로깅 설정
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger()
-
+# 관리자 url, 계정
+admin_homepage_url = "https://dev-munhak-manager.ntoday.kr/login"
 # 관리자 로그인
-def admin_login(driver, admin_homepage_url, admin_id, admin_pw):
+def admin_login(driver, admin_id, admin_pw):
     try:
         driver.get(admin_homepage_url)
         driver.find_element(By.ID, "userId").send_keys(admin_id)

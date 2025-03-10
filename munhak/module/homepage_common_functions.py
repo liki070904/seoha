@@ -6,9 +6,10 @@ from munhak.module.setup_common_functions import (click, scroll_into_view, close
 # 로깅 설정
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger()
-
+# 홈페이지 url, 계정
+homepage_url = "https://dev-munhak-home.ntoday.kr/"
 # 문학동네 홈페이지 진입
-def home_page(driver, wait, homepage_url):
+def home_page(driver, wait):
     try:
         driver.get(homepage_url)
         wait.until(lambda driver: driver.execute_script('return document.readyState') == 'complete')
