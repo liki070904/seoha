@@ -40,7 +40,7 @@ def munhak_mypage(driver):
     mypage = driver.find_element(By.XPATH, '//*[@id="header"]/div[1]/div/ul[2]/li[2]/a')
     click(driver, mypage)
 # 문학동네 > 회원정보 변경 진입
-def mydata_change(driver, wait, userChkPwd):
+def mydata_change(driver, userChkPwd):
     mydata_change = driver.find_element(By.XPATH, '//*[@id="container"]/div/div[2]/div[1]/ul/li[1]/ul/li[1]')
     click(driver, mydata_change)
     driver.find_element(By.ID, "userChkPwd").send_keys(userChkPwd)
@@ -48,7 +48,7 @@ def mydata_change(driver, wait, userChkPwd):
     click(driver,confirm)
     return userChkPwd
 # 문학동네 > 탈퇴 버튼 선택
-def withdraw(driver, wait):
+def withdraw(driver):
     time.sleep(1)
     withdraw = driver.find_element(By.XPATH, '//*[@id="changeMyInfo"]/div/button')
     scroll_into_view(driver, withdraw)
@@ -70,7 +70,7 @@ def withdraw(driver, wait):
             click(driver, check_box)
     click(driver,required_consent_check)
 # 문학동네 > 회원탈퇴
-def withdraw_confirm(driver, wait):
+def withdraw_confirm(driver):
     withdraw_confirm = driver.find_element(By.XPATH, '//*[@id="deleteAccount"]/div[2]/button[2]')
     click(driver, withdraw_confirm)
     time.sleep(2)
@@ -80,7 +80,7 @@ def withdraw_confirm(driver, wait):
     finished = driver.find_element(By.XPATH, '//*[@id="systemAlert"]/div[2]/div[2]/button')
     click(driver,finished)
 # 계간 문학동네 진입
-def quarterly_click(driver, wait):
+def quarterly_click(driver):
     try:
         book_author = driver.find_element(By.XPATH, '//*[@id="gnb"]/ul/li[2]/a')
         click(driver,book_author)
