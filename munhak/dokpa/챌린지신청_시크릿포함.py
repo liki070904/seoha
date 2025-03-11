@@ -1,25 +1,20 @@
-import logging, os, pyautogui, sys, time
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.abspath(os.path.join(current_dir, '..', '..'))
-if parent_dir not in sys.path:
-    sys.path.append(parent_dir)
+import logging, pyautogui, time
 # setup
-from munhak.module.setup_common_functions import (setup_driver)
+from munhak.module.setup_common_functions import (setup_driver, get_current_dir, get_parent_dir)
 # admin
 from munhak.module.admin_common_functions import (
     admin_login, choice_book, challenge_detail, Recruitment_period, challenge_period, search_mate, challenge_save,
     generate_date_range, challenge_tab, challenge_register, secret_radio)
 # dokpa
 from munhak.module.dokpa_common_functions import (
-    dokpa_enter, some_function, all_challenge_apply, secret_challenge_list)
+    dokpa_enter, all_challenge_apply, secret_challenge_list)
 # homepage
 from munhak.module.homepage_common_functions import (
-    home_page, munhak_login, some_function)
+    home_page, munhak_login)
 logger = logging.getLogger()
 
 def main():
     driver, wait = setup_driver()
-    some_function()
 
     # 날짜 지정 함수 호출
     date_info = generate_date_range(min_days=0, max_days=3)
@@ -37,7 +32,7 @@ def main():
     user_pw = "admin123"
 
     # 관리자 로그인
-    admin_login(driver, admin_homepage_url, admin_id, admin_pw)
+    admin_login(driver, admin_id, admin_pw)
 
     # 관리자 챌린지 탭 진입
     challenge_tab(driver,wait)
@@ -76,7 +71,7 @@ def main():
     # 문학동네 홈페이지 진입
     driver.execute_script("window.open('');")
     driver.switch_to.window(driver.window_handles[-1])
-    home_page(driver, wait, homepage_url)
+    home_page(driver, wait)
 
     # 문학동네 로그인
     munhak_login(driver, wait, user_id, user_pw)
