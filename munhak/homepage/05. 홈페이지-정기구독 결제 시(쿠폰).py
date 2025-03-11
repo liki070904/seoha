@@ -19,7 +19,7 @@ def main():
     # 로그인
     munhak_login(driver, wait, "seoha40@ntoday.kr", "admin123")
     # 계간 문학동네 진입
-    quarterly_click(driver, wait)
+    quarterly_click(driver)
     # 정기구독 기간 설정  // 1년 = period1_01, 2년 = period1_02, 3년 = period1_03
     sub_date_set(driver, wait, "period1_02")
     # 정기구독 개시 설정  // 봄 , 여름 , 가을 , 겨울
