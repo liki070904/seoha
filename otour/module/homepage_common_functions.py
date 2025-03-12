@@ -23,7 +23,7 @@ wel_product_homepage_url = "https://devwel.hanabizwel.com/pages/overseas/package
 # 복지몰 오픈
 def wel_homepage_open(driver, wait):
     try:
-        driver.get(wel_homepage_url)
+        driver.get(dev_wel_homepage_url)
         wait.until(lambda driver: driver.execute_script('return document.readyState') == 'complete')
         time.sleep(2)
         logger.info("복지몰 페이지 열기 성공")
@@ -248,11 +248,18 @@ def click_payment(driver, wait):
         logging.error(f"포인트로 결제하기 테스트 중 오류가 발생했습니다: {str(e)}")
         return
 # 공급사 태그 클릭  한진 : HJ / 롯데 : LO / 하나 : HN / 모두 : MO
-def select_supplier(driver, wait, value):
+def select_supplier(driver, wait, supplier_code):
+    SUPPLIER_XPATHS = {
+        "HN": "/html/body/div[1]/div/div/div/div/div[4]/div[1]/div[2]/div/div[1]/label/span",
+        "MO": "/html/body/div[1]/div/div/div/div/div[4]/div[1]/div[2]/div/div[2]/label/span",
+        "HJ": "/html/body/div[1]/div/div/div/div/div[4]/div[1]/div[2]/div/div[3]/label/span",
+        "LO": "/html/body/div[1]/div/div/div/div/div[4]/div[1]/div[2]/div/div[4]/label/span",
+    }
     try:
-        supplier_checkbox = wait.until(EC.element_to_be_clickable((By.XPATH, f'//*[@value="{value}"]')))
+        xpath = SUPPLIER_XPATHS.get(supplier_code)
+        supplier_checkbox = wait.until(EC.element_to_be_clickable((By.XPATH, xpath)))
         click(driver, supplier_checkbox)
-        time.sleep(1)
+        time.sleep(3)
         logger.info("공급사 선택 성공")
     except Exception as e:
         logging.error(f"공급사 선택 테스트 중 오류가 발생했습니다: {str(e)}")
