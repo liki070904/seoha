@@ -1,4 +1,4 @@
-import time, logging
+import time, logging, re
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from munhak.module.setup_common_functions import (click, scroll_into_view, close_popup)
@@ -7,11 +7,12 @@ from munhak.module.setup_common_functions import (click, scroll_into_view, close
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger()
 # 홈페이지 url, 계정
-homepage_url = "https://dev-munhak-home.ntoday.kr/"
+dev_homepage_url = "https://dev-munhak-home.ntoday.kr/"
+homepage_url = "https://munhak-home.ntoday.kr/"
 # 문학동네 홈페이지 진입
 def home_page(driver, wait):
     try:
-        driver.get(homepage_url)
+        driver.get(dev_homepage_url)
         wait.until(lambda driver: driver.execute_script('return document.readyState') == 'complete')
         time.sleep(1)
         close_popup(driver, wait, 'popMainLayer1', (By.XPATH, '//*[@id="popMainLayer1"]/div/div[2]/button[1]'))
@@ -37,8 +38,12 @@ def munhak_login(driver, wait, user_id, user_pw):
         return
 # 문학동네 > 마이페이지 진입
 def munhak_mypage(driver):
-    mypage = driver.find_element(By.XPATH, '//*[@id="header"]/div[1]/div/ul[2]/li[2]/a')
-    click(driver, mypage)
+    try:
+        mypage = driver.find_element(By.XPATH, '//*[@id="header"]/div[1]/div/ul[2]/li[2]/a')
+        click(driver, mypage)
+        logger.info("마이페이지 진입 성공")
+    except Exception as e:
+        logger.error(f"마이페이지 진입 테스트 중 오류가 발생했습니다: {str(e)}")
 # 문학동네 > 회원정보 변경 진입
 def mydata_change(driver, userChkPwd):
     mydata_change = driver.find_element(By.XPATH, '//*[@id="container"]/div/div[2]/div[1]/ul/li[1]/ul/li[1]')
@@ -105,6 +110,7 @@ def sub_date_set(driver, wait, year_id):
         click(driver, year_set_element)
         time.sleep(1)
         logger.info(f"정기구독 기간 설정 완료 (ID: {year_id})")
+
     except Exception as e:
         logger.error(f"정기구독 기간 설정 중 오류 발생 (ID: {year_id}): {str(e)}")
 # 정기구독 개시 설정
@@ -150,8 +156,8 @@ def giveaway_book(driver):
         logger.info("증정도서 선택 성공")
     except Exception as e:
         logger.error(f"증정도서 선택 테스트 중 오류가 발생했습니다: {str(e)}")
-# 결제(쿠폰) 선택 & 동의
-def payment_agree(driver):
+# 결제(포인트) 선택 & 동의
+def payment_point_agree(driver):
     try:
         choice_point = driver.find_element(By.XPATH, '//*[@id="subscription"]/div[2]/div/div[1]/div[4]/table/tbody/tr[2]/td/div/div[1]/button')
         click(driver,choice_point)
@@ -162,12 +168,60 @@ def payment_agree(driver):
         logger.info("포인트 사용, 약관 동의 성공")
     except Exception as e:
         logger.error(f"포인트 사용,약관 동의 테스트 중 오류가 발생했습니다: {str(e)}")
+# 결제(쿠폰) 선택 & 동의
+def payment_coupon_agree(driver):
+    try:
+        choice_coupon = driver.find_element(By.XPATH, '//*[@id="subscription"]/div[2]/div/div[1]/div[4]/table/tbody/tr[1]/td/div/div[1]/button')
+        click(driver, choice_coupon)
+        time.sleep(1)
+        # 총 결제 금액
+        total_pay = driver.find_element(By.XPATH, '//*[@id="subscription"]/div[2]/div/div[2]/div[1]/div[1]/div/ul[3]/li/p[2]')
+        total_pay_value = re.sub(r'\D', '', total_pay.text.strip())
+        print(f"총 결제 금액 : {total_pay_value}")
+        coupon_list = driver.find_elements(By.XPATH, '/html/body/div/div[1]/div[5]/div[2]/div[2]/div[2]/ul/li')
+        # 쿠폰 금액
+        for coupon in coupon_list:
+            price_element = coupon.find_element(By.XPATH, './/div[@class="price"]')
+            price_text = re.sub(r'\D', '', price_element.text.strip())  # 숫자만 추출
+
+            print(f"쿠폰 금액 : {price_text}")
+
+            if price_text == total_pay_value:
+                # 체크박스 찾기 및 클릭
+                checkbox = coupon.find_element(By.XPATH, './/div[1]/div/label')
+                click(driver, checkbox)
+                print(f"{total_pay_value}원 쿠폰 선택 완료")
+                time.sleep(1)
+                break
+        else:
+            logger.info("결제 가능한 쿠폰이 없습니다.")
+            return
+        # 쿠폰 적용
+        apply_coupon = driver.find_element(By.XPATH, '//*[@id="popCouponList"]/div[2]/div[3]/button')
+        click(driver, apply_coupon)
+        time.sleep(1)
+        # 약관 동의
+        agree = driver.find_element(By.XPATH, '//*[@id="subscription"]/div[2]/div/div[2]/div[1]/div[2]/div[2]/div/label')
+        click(driver, agree)
+        time.sleep(1)
+        logger.info("쿠폰 사용, 약관 동의 성공")
+    except Exception as e:
+        logger.error(f"쿠폰 사용,약관 동의 테스트 중 오류가 발생했습니다: {str(e)}")
 # 결제하기 선택
 def payment_click(driver):
-    payment = driver.find_element(By.XPATH, '//*[@id="subscription"]/div[2]/div/div[2]/div[1]/div[3]/div[2]/div[2]/button')
-    click(driver, payment)
-    time.sleep(1)
+    try:
+        payment = driver.find_element(By.XPATH, '//*[@id="subscription"]/div[2]/div/div[2]/div[1]/div[3]/div[2]/div[2]/button')
+        click(driver, payment)
+        time.sleep(1)
+        logger.info("결제하기 성공")
+    except Exception as e:
+        logger.error(f"결제하기 테스트 중 오류가 발생했습니다: {str(e)}")
 # 마이페이지 > 정기구독 내역 진입
 def my_sub_list(driver):
-    sub_list = driver.find_element(By.XPATH, '//*[@id="container"]/div/div[2]/div[1]/ul/li[2]/ul/li[4]/a')
-    click(driver, sub_list)
+    try:
+        sub_list = driver.find_element(By.XPATH, '//*[@id="container"]/div/div[2]/div[1]/ul/li[2]/ul/li[4]/a')
+        click(driver, sub_list)
+        time.sleep(1)
+        logger.info("정기구독내역 진입 성공")
+    except Exception as e:
+        logger.error(f"정기구독 내역 진입 테스트 중 오류가 발생했습니다: {str(e)}")
