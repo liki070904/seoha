@@ -3,7 +3,7 @@ import logging, pyautogui
 from munhak.module.setup_common_functions import (setup_driver, get_current_dir, get_parent_dir)
 # homepage
 from munhak.module.homepage_common_functions import (
-    home_page, munhak_login, munhak_mypage, quarterly_click, sub_date_set, sub_init_set, giveaway_book, payment_agree, payment_click, my_sub_list)
+    home_page, munhak_login, munhak_mypage, quarterly_click, sub_date_set, sub_init_set, giveaway_book, payment_point_agree, payment_click, my_sub_list)
 
 # log
 logger = logging.getLogger()
@@ -23,11 +23,11 @@ def main():
     # 정기구독 기간 설정  // 1년 = period1_01, 2년 = period1_02, 3년 = period1_03
     sub_date_set(driver, wait, "period1_02")
     # 정기구독 개시 설정  // 봄 , 여름 , 가을 , 겨울
-    sub_init_set(driver, "여름")
+    sub_init_set(driver, "겨울")
     # 증정도서 선택
     giveaway_book(driver)
     # 결제(포인트) 선택
-    payment_agree(driver)
+    payment_point_agree(driver)
     # 결제하기 선택
     payment_click(driver)
     # 마이페이지 진입
