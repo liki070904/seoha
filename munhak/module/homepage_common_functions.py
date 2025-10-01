@@ -1,7 +1,7 @@
 import time, logging, re
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from munhak.module.setup_common_functions import (click, scroll_into_view, close_popup)
+from module.setup_common_functions import (click, scroll_into_view, close_popup)
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

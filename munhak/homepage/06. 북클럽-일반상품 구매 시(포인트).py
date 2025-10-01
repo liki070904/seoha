@@ -1,8 +1,8 @@
 import logging, pyautogui
 # setup
-from munhak.module.setup_common_functions import (setup_driver, get_current_dir, get_parent_dir)
+from module.setup_common_functions import (setup_driver, get_current_dir, get_parent_dir)
 # homepage
-from munhak.module.homepage_common_functions import (
+from module.homepage_common_functions import (
     home_page, munhak_login, munhak_mypage, bookclub_click, shop_click, product_click, buy_product, bookclub_point_payment, bookclub_payment_click, my_sub_list)
 
 # log
