@@ -1,0 +1,4 @@
+pymysql
+selenium
+pyautogui
+webdriver_manager
