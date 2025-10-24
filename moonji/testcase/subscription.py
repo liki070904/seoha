@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 
-from n2common.web.setup_module import (setup_driver, fill_form_field, wait_for_user_input_gui)
+from n2common.web.setup_module import (setup_driver, fill_form_field, wait_for_user_input)
 from n2common.web.verify_module import (get_order_number, compare_order_numbers)
 from module.homepage_common_functions import (
     intro_skip, navigation_moonji, select_gift_books, handle_delivery_address)
@@ -64,7 +64,7 @@ def main():
 
         # 🚩 8️⃣ 토스 결제 수동입력 대기
         logger.info("💳 토스 결제창 오픈 — 사용자 수동 입력 모드 진입")
-        wait_for_user_input_gui("토스 결제를 직접 완료한 뒤 '확인' 버튼을 눌러주세요.")
+        wait_for_user_input("토스 결제를 직접 완료한 뒤 '확인' 버튼을 눌러주세요.")
 
         # 🚩 9️⃣ 결제 완료
         logger.info("✅ 사용자가 결제 완료 확인 — 자동화 재개 중...")
