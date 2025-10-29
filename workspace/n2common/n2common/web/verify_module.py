@@ -1,10 +1,13 @@
 import re, logging, time
 
+import pyautogui
 from selenium.common import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
+
+from n2common.web.setup_module import handle_alert
 
 logger = logging.getLogger(__name__)
 
@@ -139,6 +142,35 @@ def verify_url(
         logger.exception(f"URL 검증 중 오류 발생: {e}")
         raise
 
+# pdf 서비스 신청 페이지 알럿 노출 검증
+def verify_pdf_access(driver, wait, *, expected_alert_text="정기구독 신청자 전용 서비스입니다."):
+    """
+    ✅ PDF 서비스 접근 검증 모듈
+    - 정기구독중인 계정은 알럿이 없어야 정상
+    - 알럿이 뜨면 정기구독 미반영 or 권한 오류로 판단
 
+    Args:
+        driver: WebDriver 인스턴스
+        wait: WebDriverWait 인스턴스
+        expected_alert_text (str): 접근 제한 알럿 문구 (기본값: '정기구독 신청자 전용 서비스입니다.')
+
+    Returns:
+        bool: True = 접근 성공 (정기구독 중), False = 접근 제한 (정기구독 미반영)
+    """
+    try:
+        # 🚩 알럿 검증
+        alert_text = handle_alert(driver, expected_text=expected_alert_text)
+
+        if alert_text:
+            logger.warning(f"⚠️ 접근 제한 알럿 발생: {alert_text}")
+            pyautogui.alert("⚠️ 정기구독 미반영 — PDF 서비스 접근 제한 알럿 발생", "검증 실패")
+            return False
+
+        logger.info("✅ 알럿 없음 — PDF 서비스 페이지 정상 접근 (정기구독중 계정)")
+        return True
+
+    except Exception as e:
+        logger.exception(f"❌ PDF 접근 검증 중 오류 발생: {e}")
+        return False
 
 

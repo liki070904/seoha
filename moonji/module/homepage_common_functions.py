@@ -8,7 +8,7 @@ from selenium.common.exceptions import TimeoutException, NoAlertPresentException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.wait import WebDriverWait
 
-from n2common.web.setup_module import (click, fill_form_field)
+from n2common.web.setup_module import (click, fill_form_field, handle_alert)
 
 import logging, time, re
 
@@ -37,7 +37,6 @@ def intro_skip(driver, wait):
         raise
 
 # GNB 클릭
-
 def navigation_moonji(driver, wait, main_menu: str, sub_menu: str = None):
     """
     문학과지성사 홈페이지 GNB 네비게이션 이동 함수
@@ -48,7 +47,6 @@ def navigation_moonji(driver, wait, main_menu: str, sub_menu: str = None):
     예시:
         navigation_moonji(driver, wait, "문학과사회", "문학과사회 구독")
     """
-
     try:
         # 1️⃣ GNB 메인 메뉴 찾기
         main_xpath = f"//ul[@class='nav']//a[normalize-space(text())='{main_menu}']"
@@ -167,7 +165,6 @@ def select_gift_books_auto(driver, wait, subscribe_term_value: str):
         logger.error(f"❌ 도서 선택 중 오류 → {e}")
         raise
 
-
 # ======================================================================
 # 🎯 2️⃣ 키워드 기반 선택형 — 제목에 특정 단어가 포함된 도서만 선택
 # ======================================================================
@@ -247,7 +244,6 @@ def select_gift_books(driver, wait, mode="auto", **kwargs):
     else:
         raise ValueError("❌ select_gift_books() mode는 'auto' 또는 'keyword'만 허용됩니다.")
 
-
 # 배송정보 입력 - 배송지 없으면 등록 클릭 있으면 패스
 def handle_delivery_address(driver, wait, addr_info: dict):
     """
@@ -293,7 +289,6 @@ def handle_delivery_address(driver, wait, addr_info: dict):
     except Exception as e:
         logger.error(f"❌ 배송지 처리 중 오류 발생: {e}")
         raise
-
 
 # ======================================================================
 # 1️⃣ 배송지 등록 팝업 오픈
@@ -373,7 +368,6 @@ def search_addr(driver, keyword: Optional[str] = None):
         logger.error(f"❌ 주소검색 실패: {e}")
         raise
 
-
 # ======================================================================
 # 3️⃣ 배송지 등록 입력 (정상 순서)
 # ======================================================================
@@ -426,7 +420,6 @@ def fill_delivery_form(driver, wait,
         logger.error(f"❌ 배송지 입력 중 오류 발생: {e}")
         raise
 
-
 # ======================================================================
 # 4️⃣ 등록 버튼 클릭 및 팝업 닫힘 대기
 # ======================================================================
@@ -444,25 +437,23 @@ def submit_delivery(driver, wait):
         logger.error(f"❌ 배송지 등록 제출 중 오류 발생: {e}")
         raise
 
-# 브라우저 알럿 닫기
-def handle_alert(driver, timeout=5):
-    """
-    브라우저 alert('등록되었습니다.') 팝업 자동 확인
-    """
-    try:
-        WebDriverWait(driver, timeout).until(EC.alert_is_present())
-        alert = Alert(driver)
-        msg = alert.text
-        logger.info(f"📢 Alert 표시됨: {msg}")
-        alert.accept()  # '확인' 클릭
-        logger.info("✅ Alert 자동 닫기 완료")
-        time.sleep(0.5)
-        return msg
-    except NoAlertPresentException:
-        logger.warning("⚠ Alert가 표시되지 않았습니다.")
-    except Exception as e:
-        logger.error(f"❌ Alert 처리 중 오류: {e}")
-        raise
-
+# todo
+# setup_module에 있는 함수로 사용 > 이슈 없으면 삭제 예정
+# # 브라우저 알럿 닫기
+# def handle_alert(driver, timeout=5):
+#     try:
+#         WebDriverWait(driver, timeout).until(EC.alert_is_present())
+#         alert = Alert(driver)
+#         msg = alert.text
+#         logger.info(f"📢 Alert 표시됨: {msg}")
+#         alert.accept()  # '확인' 클릭
+#         logger.info("✅ Alert 자동 닫기 완료")
+#         time.sleep(0.5)
+#         return msg
+#     except NoAlertPresentException:
+#         logger.warning("⚠ Alert가 표시되지 않았습니다.")
+#     except Exception as e:
+#         logger.error(f"❌ Alert 처리 중 오류: {e}")
+#         raise
 
 

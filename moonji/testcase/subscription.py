@@ -4,7 +4,7 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 
 from n2common.web.setup_module import (setup_driver, fill_form_field, wait_for_user_input)
-from n2common.web.verify_module import (get_order_number, compare_order_numbers)
+from n2common.web.verify_module import (get_order_number, compare_order_numbers, verify_pdf_access)
 from module.homepage_common_functions import (
     intro_skip, navigation_moonji, select_gift_books, handle_delivery_address)
 
@@ -42,7 +42,7 @@ def main():
 
         # 🚩 4️⃣ 구독 옵션 선택
         fill_form_field(driver, wait, "//input[@name='subscribeTerm']", "2", field_type="radio", ui_name="정기구독-구독기간")
-        fill_form_field(driver, wait, ".nice-select", "152호", field_type="select", ui_name="정기구독-시작호수")
+        fill_form_field(driver, wait, ".nice-select", "151호", field_type="select", ui_name="정기구독-시작호수")
 
         # 🚩 5️⃣ 증정도서 선택 팝업
         fill_form_field(driver, wait, "#btnSelGiftBook", None, field_type="click", ui_name="증정도서 선택")
@@ -80,6 +80,10 @@ def main():
         # 정기구독 내역 - 주문번호 확인
         order_list_num = get_order_number(driver, wait, ".order_list .order_num", ui_name="정기구독 내역")
         compare_order_numbers(order_complete_num, order_list_num, context="moonji_subscription")
+
+        # PDF 서비스 신청 페이지 진입
+        navigation_moonji(driver, wait, "문학과사회", "PDF 서비스 신청")
+        verify_pdf_access(driver, wait)
 
         # ✅ 테스트 완료 알림
         pyautogui.confirm(
