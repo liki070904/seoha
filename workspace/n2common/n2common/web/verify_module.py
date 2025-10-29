@@ -1,9 +1,10 @@
-import re, logging
+import re, logging, time
 
 from selenium.common import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
 
 logger = logging.getLogger(__name__)
 
@@ -82,7 +83,61 @@ def compare_order_numbers(order_num_1: str, order_num_2: str, context: str = "�
         logger.error(f"❌ [{context}] 주문번호 비교 중 오류 발생: {e}")
         raise
 
+# 윈도우 새창(탭) 감지 후 전환
+def switch_to_new_window(driver, delay: float = 2.0, timeout: int = 10):
+    """
+    ✅ 새창(탭) 감지 후 전환
+    - delay: 창이 열릴 여유 시간
+    - timeout: 창 개수 감지 최대 대기시간
+    """
+    logger.info(f"🕓 새창 생성 대기 중 (delay={delay}s)...")
+    time.sleep(delay)  # 새창 뜨는 여유시간 확보
 
+    WebDriverWait(driver, timeout).until(lambda d: len(d.window_handles) > 1)
+    handles = driver.window_handles
+    driver.switch_to.window(handles[-1])
+    logger.info("🪟 새창 전환 완료")
+    return driver.current_window_handle
+
+# URL 검증
+def verify_url(
+        driver,
+        expected: str,
+        *,
+        exact: bool = False,
+        switch_new_window: bool = False,
+        timeout: int = 10,
+        delay: float = 2.0  # ✅ 새창 로딩 여유 시간
+):
+    """
+    URL 검증 통합 함수 (간소화 + 안정형)
+    --------------------------------
+    - 새창이 느리게 열릴 때를 대비해 sleep(delay) 적용
+    - 전체 일치(exact=True) 또는 포함 여부 비교(default)
+    """
+    try:
+        current_url = WebDriverWait(driver, timeout).until(lambda d: d.current_url)
+        logger.info(f"현재 URL: {current_url}")
+
+        # URL 비교
+        if exact:
+            if current_url == expected:
+                logger.info(f"✅ URL 정확 일치: {current_url}")
+                return True
+            else:
+                logger.error(f"❌ URL 불일치 (기대: {expected}, 실제: {current_url})")
+                raise AssertionError(f"URL 불일치: 기대='{expected}', 실제='{current_url}'")
+        else:
+            if expected in current_url:
+                logger.info(f"✅ URL 포함 검증 성공: '{expected}' in '{current_url}'")
+                return True
+            else:
+                logger.error(f"❌ URL 불일치 (기대 포함: '{expected}', 실제: '{current_url}')")
+                raise AssertionError(f"URL 불일치: '{current_url}' (기대 포함: '{expected}')")
+
+    except Exception as e:
+        logger.exception(f"URL 검증 중 오류 발생: {e}")
+        raise
 
 
 
