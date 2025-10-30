@@ -9,12 +9,18 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException,
 
 import tkinter as tk
 
+# ✅ 로깅 설정 추가 (모듈 로드 시 자동 설정)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler()]
+)
 logger = logging.getLogger(__name__)
 
 IFRAME_PATHS = {
     "asIsAdmin" : '//*[@id="myTabbar"]/div/div/div[3]/div/iframe',
     "asIsAdminCancel" : '//*[@id="myTabbar"]/div/div/div[4]/div/iframe',
-    "toBeAdmin" : '//*[@id="ifr_menu_23"]'}
+    "toBeAdmin" : '//*[@id="ifr_menu_26"]'}
 
 # path
 def get_current_dir():
@@ -24,6 +30,7 @@ def get_parent_dir(level=1):
     """현재 파일의 상위 디렉토리 반환 (기본적으로 한 단계 위)"""
     current_dir = get_current_dir()
     return os.path.abspath(os.path.join(current_dir, *[".."] * level))
+
 # 드라이버 설정
 def setup_driver():
     # Chrome WebDriver 설정
@@ -41,6 +48,7 @@ def setup_driver():
     driver.implicitly_wait(3)
     wait = WebDriverWait(driver, 3)
     return driver, wait
+
 # 요소가 보이는 영역 안에 있도록 스크롤하는 함수
 def scroll_into_view(driver, element=None, bottom=False):
     if bottom:
@@ -64,6 +72,7 @@ def click(driver, element):
             }));
         });
     """, element)
+
 # 팝업 닫기 함수
 def close_popup(driver, wait, popup_id, close_button_locator):
     try:
@@ -72,9 +81,9 @@ def close_popup(driver, wait, popup_id, close_button_locator):
             close_button = wait.until(EC.presence_of_element_located(close_button_locator))
             scroll_into_view(driver, close_button)
             click(driver, close_button)
-            print("팝업 닫기 완료")
+            logger.info("팝업 닫기 완료")
         else:
-            print("팝업이 존재하지 않습니다.")
+            logger.error("팝업이 존재하지 않습니다.")
     except Exception as e:
         print(f"팝업 닫기 중 오류 발생: {e}")
 
@@ -402,44 +411,91 @@ def submit(driver, wait, iframe_key="asIsAdmin"):
         raise
 
 # ======================================
-# 공통: 좌측 메뉴 탐색
+# 공통: LNB 탐색
 # ======================================
-def navigation(driver, L_menu: str, M_menu: str, S_menu: str, L_index=0, M_index=0, S_index=0):
+def navigation(driver, wait, L_menu: str, M_menu: str = None, S_menu: str = None, L_index=0, M_index=0, S_index=0):
     """
-    [공통] 좌측 메뉴 L→M→S 순서로 클릭 후 iframe 진입
+    [공통] 관리자 페이지 좌측 메뉴 네비게이션 (L → M → S 자동 인식)
+    ------------------------------------------------------------
     사용처:
         - Giftian 관리자
         - 오투어 관리자
         - 복지몰 관리자 등
+    ------------------------------------------------------------
+    인자 설명:
+        L_menu: 1단계 메뉴명 (필수)
+        M_menu: 2단계 메뉴명 (선택)
+        S_menu: 3단계 메뉴명 (선택)
+        L_index/M_index/S_index: 동일 메뉴명이 여러 개 있을 때 인덱스로 구분
+    ------------------------------------------------------------
+    예시:
+        navigation(driver, wait, "회원관리", "회원관리")
+        navigation(driver, wait, "정산관리", "정산내역", "월별 정산")
     """
     try:
         # 1️⃣ L 메뉴 클릭
+        wait.until(EC.presence_of_all_elements_located((By.LINK_TEXT, L_menu)))
         L_menus = driver.find_elements(By.LINK_TEXT, L_menu)
         if len(L_menus) <= L_index:
             raise Exception(f"'{L_menu}' 메뉴({L_index})를 찾을 수 없습니다.")
-        click(driver, L_menus[L_index])
-        time.sleep(0.5)
+        
+        L_menu_element = L_menus[L_index]
+        click(driver, L_menu_element)
+        time.sleep(1)
+        logger.info(f"✅ 1단 메뉴 클릭 완료 → {L_menu}")
 
-        # 2️⃣ M 메뉴 클릭
-        M_menus = driver.find_elements(By.LINK_TEXT, M_menu)
-        if len(M_menus) <= M_index:
-            raise Exception(f"'{M_menu}' 메뉴({M_index})를 찾을 수 없습니다.")
-        click(driver, M_menus[M_index])
-        time.sleep(0.5)
+        # 2️⃣ M 메뉴 (있을 경우) - 하위 메뉴 컨테이너에서만 검색
+        if M_menu:
+            # L 메뉴의 부모/형제 요소에서 하위 메뉴 찾기
+            try:
+                # 방법 1: 열린 하위 메뉴 영역에서만 검색 (class에 'open', 'active', 'on' 등 포함)
+                sub_menu_container = L_menu_element.find_element(
+                    By.XPATH, 
+                    "./following-sibling::ul | ./parent::*/following-sibling::ul | ./parent::*/ul"
+                )
+                M_menus = sub_menu_container.find_elements(By.LINK_TEXT, M_menu)
+            except:
+                # 방법 2: 전체에서 검색하되, L 메뉴는 제외
+                all_M_menus = driver.find_elements(By.LINK_TEXT, M_menu)
+                M_menus = [m for m in all_M_menus if m != L_menu_element]
+            
+            if len(M_menus) <= M_index:
+                raise Exception(f"'{M_menu}' 메뉴({M_index})를 찾을 수 없습니다.")
+            
+            M_menu_element = M_menus[M_index]
+            click(driver, M_menu_element)
+            time.sleep(0.5)
+            logger.info(f"✅ 2단 메뉴 클릭 완료 → {L_menu} > {M_menu}")
 
-        # 3️⃣ S 메뉴 클릭
-        S_menus = driver.find_elements(By.LINK_TEXT, S_menu)
-        if len(S_menus) <= S_index:
-            raise Exception(f"'{S_menu}' 메뉴({S_index})를 찾을 수 없습니다.")
-        click(driver, S_menus[S_index])
-        time.sleep(0.5)
+        # 3️⃣ S 메뉴 (있을 경우)
+        if S_menu:
+            if M_menu:
+                # M 메뉴의 하위에서 검색
+                try:
+                    sub_menu_container = M_menu_element.find_element(
+                        By.XPATH, 
+                        "./following-sibling::ul | ./parent::*/following-sibling::ul | ./parent::*/ul"
+                    )
+                    S_menus = sub_menu_container.find_elements(By.LINK_TEXT, S_menu)
+                except:
+                    all_S_menus = driver.find_elements(By.LINK_TEXT, S_menu)
+                    S_menus = [s for s in all_S_menus if s != M_menu_element and s != L_menu_element]
+            else:
+                S_menus = driver.find_elements(By.LINK_TEXT, S_menu)
+            
+            if len(S_menus) <= S_index:
+                raise Exception(f"'{S_menu}' 메뉴({S_index})를 찾을 수 없습니다.")
+            click(driver, S_menus[S_index])
+            time.sleep(0.5)
+            logger.info(f"✅ 3단 메뉴 클릭 완료 → {L_menu} > {M_menu} > {S_menu}")
 
-        logger.info(f"✅ 메뉴 이동 완료 → {L_menu} > {M_menu} > {S_menu}")
+        logger.info(f"🎯 메뉴 이동 성공: {L_menu} > {M_menu if M_menu else '-'} > {S_menu if S_menu else '-'}")
         return True
 
     except Exception as e:
         logger.exception(f"❌ navigation 실패: {e}")
         raise
+
 
 def set_usage_radio(driver, wait, value: str):
     """
@@ -467,7 +523,6 @@ def set_usage_radio(driver, wait, value: str):
 def wait_for_user_input(prompt="결제 완료 후 확인 버튼을 눌러주세요."):
     pyautogui.alert(prompt, title="🟢 결제 수동 진행 중")
     logger.info("✅ GUI 창에서 확인 입력 → 자동화 재개")
-
 
 
 

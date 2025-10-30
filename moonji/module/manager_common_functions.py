@@ -1,10 +1,11 @@
-import os, logging, time
+import os, logging, time, pyautogui
 
-from selenium.webdriver import ActionChains, Keys
+from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
 
-from n2common.web.setup_module import click, iframe, scroll_into_view
+from n2common.web.setup_module import click, scroll_into_view
 
 logger = logging.getLogger(__name__)
 
@@ -21,20 +22,6 @@ def manager_open(driver, wait, url: str):
     except Exception as e:
         logger.error(f"❌ 관리자 페이지 열기 실패: {e}")
         raise
-
-
-def manager_login(driver, wait, manager_id: str, manager_pw: str):
-    """관리자 로그인"""
-    try:
-        driver.find_element(By.ID, "userId").send_keys(manager_id)
-        driver.find_element(By.ID, "userPw").send_keys(manager_pw)
-        login_button = wait.until(EC.element_to_be_clickable((By.ID, "btnlogin")))
-        click(driver, login_button)
-        logger.info(f"✅ 관리자 로그인 성공: {manager_id}")
-    except Exception as e:
-        logger.error(f"❌ 관리자 로그인 실패: {e}")
-        raise
-
 
 # ========================================
 # 2️⃣ 배너 관리 공통 영역
@@ -86,7 +73,7 @@ def select_checkbox_list(driver, wait, area_selector: str, label_list: list[str]
         logger.exception(f"❌ select_checkbox_list 오류: {e}")
         raise
 
-
+# 배너명 입력
 def input_banner_name(driver, banner_name: str):
     """배너명 입력"""
     try:
@@ -98,7 +85,7 @@ def input_banner_name(driver, banner_name: str):
         logger.error(f"❌ 배너명 입력 실패: {e}")
         raise
 
-
+# 배너 url 입력
 def input_banner_url(driver, device: str, url: str):
     """배너 URL 입력 (PC/모바일)"""
     try:
@@ -111,7 +98,7 @@ def input_banner_url(driver, device: str, url: str):
         logger.error(f"❌ {device.upper()} URL 입력 실패: {e}")
         raise
 
-
+# 배너 이미리 업로드
 def upload_banner_image_common(driver, wait, device: str, file_path: str):
     """배너 이미지 업로드 (PC/모바일)"""
     try:
@@ -168,148 +155,54 @@ def select_radio_by_label(driver, wait, area_selector: str, label_text: str):
         logger.exception(f"❌ 라디오 선택 실패: {e}")
         raise
 
-
-# ========================================
-# 3️⃣ 예약/결제 관리 전용 (복지몰)
-# ========================================
-# ⚠️ 예약 관련 함수는 추후 별도 파일로 분리 권장
-
-def channel_cancel_management(driver, wait):
-    """복지몰 취소요청 조회 메뉴 진입"""
+# 관리자 팝업 클릭
+def handle_popup_confirm(driver, wait, timeout=5):
+    """
+    [공통] HTML 팝업이 뜨면 '확인' 버튼(.btnAlert) 클릭
+    --------------------------------------------------------
+    - 팝업 텍스트에 따라 성공/실패 구분
+    - 실패 문구 포함 시 테스트 실패 알림 후 종료
+    """
     try:
-        click(driver, wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "a.ico_book"))))
-        click(driver, wait.until(EC.element_to_be_clickable((By.XPATH, "//a[contains(text(), '채널예약관리')]"))))
-        click(driver, wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="menu_51"]/a'))))
-        logger.info("✅ 복지몰 취소요청조회 메뉴 진입 완료")
-    except Exception as e:
-        logger.error(f"❌ 복지몰취소요청조회 메뉴 실패: {e}")
+        WebDriverWait(driver, timeout).until(
+            EC.visibility_of_element_located((By.CSS_SELECTOR, "div.popup"))
+        )
+        logger.info("✅ 팝업 감지됨")
 
-# 취소요청건 진입
-def cancel_request_info(driver, wait):
-    try:
-        cancel_req_info = driver.find_element(By.XPATH, '//*[@id="table_canceled"]/tbody/tr[1]/td[5]/a')
-        click(driver,cancel_req_info)
-        time.sleep(1)
-        logger.info("취소요청 진입 성공")
-    except Exception as e:
-        logging.error(f"취소요청 진입 테스트 중 오류가 발생했습니다: {str(e)}")
-        return
+        # 1️⃣ 팝업 텍스트 읽기
+        pop_text_elem = driver.find_element(By.CSS_SELECTOR, "div.popup .pop_tit")
+        popup_text = (pop_text_elem.text or "").strip()
+        logger.info(f"📄 팝업 텍스트: {popup_text}")
 
-# 환불요청
-def payback_request(driver, wait, cancel_reason):
-    try:
-        reason = driver.find_element(By.XPATH, '//*[@id="tbl_resinfo_payment_his"]/tbody/tr[3]/td[1]/div/div/span')
-        click(driver, reason)
-        time.sleep(1)
-        all_cancel = driver.find_element(By.XPATH, '//*[@id="tbl_resinfo_payment_his"]/tbody/tr[3]/td[1]/div/div/div/ul/li[2]')
-        click(driver, all_cancel)
-        time.sleep(1)
-        driver.find_element(By.XPATH, '//*[@id="note"]').send_keys(cancel_reason)
-        time.sleep(1)
-        cancel_save = driver.find_element(By.XPATH, '//*[@id="savePayinfo"]')
-        click(driver, cancel_save)
-        time.sleep(1)
-        actions = ActionChains(driver)
-        actions.send_keys(Keys.SPACE).perform()
-        time.sleep(1)
-        logger.info("환불 요청 성공")
-    except Exception as e:
-        logging.error(f"환불 요청 테스트 중 오류가 발생했습니다: {str(e)}")
-        return
+        # 2️⃣ [확인] 버튼 클릭
+        ok_button = WebDriverWait(driver, timeout).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, "div.popup .btnAlert"))
+        )
+        scroll_into_view(driver, ok_button)
+        click(driver, ok_button)
+        logger.info("✅ 팝업 [확인] 버튼 클릭 완료")
 
-# 예약정보 탭 > 상태값 취소 변경
-def status_cancel(driver, wait):
-    try:
-        time.sleep(2)
-        reserve_tab = driver.find_element(By.XPATH, '//*[@id="resinfo"]/a')
-        click(driver, reserve_tab)
-        time.sleep(1)
-        reserve_status = driver.find_element(By.XPATH, '//*[@id="tbl_resinfo_detail"]/tbody/tr[3]/td[1]/div/span')
-        click(driver, reserve_status)
-        time.sleep(1)
-        driver.execute_script("window.scrollBy(0, 10);")
-        cancel = driver.find_element(By.XPATH, '//*[@id="tbl_resinfo_detail"]/tbody/tr[3]/td[1]/div/div/ul/li[6]')
-        click(driver, cancel)
-        time.sleep(1)
-        change_status = driver.find_element(By.XPATH, '//*[@id="saveResStatus"]')
-        click(driver, change_status)
-        time.sleep(1)
-        actions = ActionChains(driver)
-        actions.send_keys(Keys.SPACE).perform()
-        time.sleep(1)
-        logger.info("예약정보 진입, 상태값 취소 변경 성공")
-    except Exception as e:
-        logging.error(f"예약정보 진입, 상태값 취소 변경 테스트 중 오류가 발생했습니다: {str(e)}")
-        return
+        # 3️⃣ 문구별 성공/실패 처리
+        fail_keywords = ["이미", "중복", "오류", "실패", "존재", "사용중"]
 
-# 취소정보 저장
-def save_to_cancel_info(driver, wait):
-    try:
-        time.sleep(1)
-        cancel_status = driver.find_element(By.XPATH, '//*[@id="tbl_cancel"]/tbody/tr[2]/td[2]/div/span')
-        click(driver, cancel_status)
-        cancel_reason = driver.find_element(By.XPATH, '//*[@id="tbl_cancel"]/tbody/tr[2]/td[2]/div/div/ul/li[2]')
-        click(driver, cancel_reason)
-        save_status = driver.find_element(By.XPATH, '//*[@id="saveResinfo"]/span')
-        click(driver, save_status)
-        time.sleep(1)
-        actions = ActionChains(driver)
-        actions.send_keys(Keys.SPACE).perform()
-        time.sleep(1)
-        logger.info("취소정보 저장 성공")
-    except Exception as e:
-        logging.error(f"취소정보 저장 테스트 중 오류가 발생했습니다: {str(e)}")
-        return
+        if any(word in popup_text for word in fail_keywords):
+            logger.error(f"❌ 실패 팝업 감지됨: {popup_text}")
+            pyautogui.alert(
+                title="❌ 테스트 실패",
+                text=f"테스트 실패: {popup_text}",
+            )
+            raise SystemExit(f"테스트 실패: {popup_text}")
 
-# 예약 상세 진입
-def click_search_reserve_detail(driver, wait):
-    try:
-        # 검색 버튼 클릭
-        search_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.btn_search")))
-        click(driver, search_button)
-        time.sleep(0.5)
-        # 예약 상세 진입
-        reserve_detail = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "table.tbl_list tbody tr td a")))
-        click(driver, reserve_detail)
-        time.sleep(2)
-        #iframe 탈출
-        driver.switch_to.default_content()
-        time.sleep(2)
-        logger.info("예약 상세 진입 성공")
-    except Exception as e:
-        logging.error(f"예약 상세 진입 테스트 중 오류가 발생했습니다: {str(e)}")
-        return
+        logger.info("🟢 정상 팝업 처리 완료")
+        return True
 
-# 예약 확정
-def check_reservation_status(driver, wait):
-    try:
-        iframe(driver,wait)
-        wait_reservation_element = wait.until(EC.element_to_be_clickable((By.XPATH, "//span[contains(@class, 'current') and text()='대기예약']")))
-        click(driver, wait_reservation_element)
-        # '예약확정' 옵션 클릭
-        reservation_confirm_option = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "li.option[data-value='10']")))
-        click(driver, reservation_confirm_option)
-        time.sleep(0.5)
-        #변경 버튼 선택
-        change_button = wait.until(EC.element_to_be_clickable((By.ID, "saveResStatus")))
-        click(driver, change_button)
-        time.sleep(0.5)
-        logger.info("예약확정 선택 성공")
-    except Exception as e:
-        logging.error(f"예약확정 선택 테스트 중 오류가 발생했습니다: {str(e)}")
-        return
+    except TimeoutException:
+        logger.warning("⚠️ 팝업이 표시되지 않음")
+        return False
 
-# 결제정보 진입
-def payment_info(driver, wait):
-    try:
-        payment_tab = driver.find_element(By.XPATH, '//*[@id="payinfo"]/a')
-        click(driver,payment_tab)
-        logger.info("결제정보 진입 성공")
-        time.sleep(1)
     except Exception as e:
-        logging.error(f"결제정보 진입 테스트 중 오류가 발생했습니다: {str(e)}")
-        return
-
+        logger.exception(f"❌ 팝업 처리 중 오류 발생: {e}")
+        raise
 
 
 

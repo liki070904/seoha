@@ -31,7 +31,6 @@ def main():
         fill_form_field(driver, wait, "userId", "seoha34", field_type="text", ui_name="ID 입력")
         fill_form_field(driver, wait, "userPw", "admin135!", field_type="text", ui_name="PW 입력")
         fill_form_field(driver, wait, "//button[contains(@class, 'fill_black')]", None, field_type="click", ui_name="로그인 버튼")
-        logger.info("✅ 로그인 완료")
 
         # 🚩 3️⃣ 정기구독 페이지 진입
         navigation_moonji(driver, wait, "문학과사회", "문학과사회 구독")
