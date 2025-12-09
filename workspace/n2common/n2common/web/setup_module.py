@@ -524,10 +524,95 @@ def wait_for_user_input(prompt="결제 완료 후 확인 버튼을 눌러주세�
     pyautogui.alert(prompt, title="🟢 결제 수동 진행 중")
     logger.info("✅ GUI 창에서 확인 입력 → 자동화 재개")
 
+# 정기구독 결제수단 선택 함수
+def select_payment_method(driver, wait, payment_name="신용카드 결제", refund_info=None):
+    """
+    문지 정기구독 결제수단 선택 함수
 
+    실행 파일에서는 결제수단 '이름'만 넘긴다.
+      - "신용카드 결제", "신용카드", "카드" → 신용카드
+      - "가상계좌 입금", "가상계좌"        → 가상계좌
 
+    :param payment_name: 화면에 보이는 결제수단명 (또는 그 일부분)
+    :param refund_info:  가상계좌 선택 시 필수
+        {
+            "bank": "KB국민은행",
+            "account": "12345678901234",
+            "holder": "이서하"
+        }
+    """
+    name = (payment_name or "").strip()
 
+    # 🔹 신용카드 계열 키워드
+    is_card = any(k in name for k in ["신용카드", "카드"])
 
+    # 🔹 가상계좌 계열 키워드
+    is_vbank = any(k in name for k in ["가상계좌", "가상 계좌"])
+
+    # 🟢 1) 신용카드
+    if is_card and not is_vbank:
+        logger.info(f"결제수단 선택: 신용카드 ({payment_name})")
+        fill_form_field(
+            driver, wait,
+            "//label[@for='radio01']",
+            "CARD",
+            field_type="radio",
+            ui_name="결제수단-신용카드"
+        )
+        return
+
+    # 🔵 2) 가상계좌
+    if is_vbank and not is_card:
+        logger.info(f"결제수단 선택: 가상계좌 ({payment_name})")
+
+        if not refund_info:
+            raise ValueError("가상계좌를 사용할 경우 refund_info가 필요합니다. {'bank','account','holder'} 필수")
+
+        # 2-1. 라디오 클릭
+        fill_form_field(
+            driver, wait,
+            "//label[@for='radio02']",
+            "VIRTUAL_ACCOUNT",
+            field_type="radio",
+            ui_name="결제수단-가상계좌"
+        )
+
+        # 2-2. 환불계좌 영역 노출 대기
+        wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".box.fill_bg10")))
+
+        # 2-3. 은행 선택 (select + nice-select)
+        fill_form_field(
+            driver, wait,
+            ".box.fill_bg10 .nice-select.sel_sm",
+            refund_info["bank"],
+            field_type="select",
+            ui_name="환불계좌-은행"
+        )
+
+        # 2-4. 계좌번호 입력
+        fill_form_field(
+            driver, wait,
+            "rfnAcnutNo",                  # id="rfnAcnutNo"
+            refund_info["account"],
+            field_type="text",
+            ui_name="환불계좌-계좌번호"
+        )
+
+        # 2-5. 예금주 입력
+        fill_form_field(
+            driver, wait,
+            "rfnAcntr",                    # id="rfnAcntr"
+            refund_info["holder"],
+            field_type="text",
+            ui_name="환불계좌-예금주"
+        )
+        return
+
+    # 🔴 인식 실패 시
+    raise ValueError(
+        f'지원하지 않는 결제수단명입니다: "{payment_name}". '
+        '예) "신용카드 결제", "가상계좌 입금"'
+    )
 
 
 

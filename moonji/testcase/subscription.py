@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 
-from n2common.web.setup_module import (setup_driver, fill_form_field, wait_for_user_input)
+from n2common.web.setup_module import (setup_driver, fill_form_field, wait_for_user_input, select_payment_method)
 from n2common.web.verify_module import (get_order_number, compare_order_numbers, verify_pdf_access)
 from module.homepage_common_functions import (
     intro_skip, navigation_moonji, select_gift_books, handle_delivery_address)
@@ -41,7 +41,7 @@ def main():
 
         # 🚩 4️⃣ 구독 옵션 선택
         fill_form_field(driver, wait, "//input[@name='subscribeTerm']", "2", field_type="radio", ui_name="정기구독-구독기간")
-        fill_form_field(driver, wait, ".nice-select", "151호", field_type="select", ui_name="정기구독-시작호수")
+        fill_form_field(driver, wait, ".nice-select", "153호", field_type="select", ui_name="정기구독-시작호수")
 
         # 🚩 5️⃣ 증정도서 선택 팝업
         fill_form_field(driver, wait, "#btnSelGiftBook", None, field_type="click", ui_name="증정도서 선택")
@@ -57,22 +57,36 @@ def main():
         # 🚩 6️⃣ 배송지 처리 (등록 여부 자동판단)
         handle_delivery_address(driver, wait, addr_info)
 
-        # 🚩 7️⃣ 결제 약관 동의 + 결제 버튼
+        # 🚩 7️⃣ 결제수단 선택 (default : 신용카드)
+        # select_payment_method(driver, wait, payment_name="신용카드 결제")
+        select_payment_method(
+            driver,
+            wait,
+            payment_name="가상계좌 입금",
+            refund_info={
+                "bank": "신한은행",          # nice-select 옵션 텍스트와 맞게
+                "account": "110474969100",
+                "holder": "이서하",
+            }
+        )
+
+
+        # 🚩 8️⃣ 결제 약관 동의 + 결제 버튼
         fill_form_field(driver, wait, "chkAgree", None, field_type="checkbox", ui_name="결제 약관 동의")
         fill_form_field(driver, wait, "//button[contains(., '결제하기')]", None, field_type="click", ui_name="정기구독 결제하기")
 
-        # 🚩 8️⃣ 토스 결제 수동입력 대기
+        # 🚩 9️⃣ 토스 결제 수동입력 대기
         logger.info("💳 토스 결제창 오픈 — 사용자 수동 입력 모드 진입")
         wait_for_user_input("토스 결제를 직접 완료한 뒤 '확인' 버튼을 눌러주세요.")
 
-        # 🚩 9️⃣ 결제 완료
+        # 🚩 🔟 결제 완료
         logger.info("✅ 사용자가 결제 완료 확인 — 자동화 재개 중...")
         logger.info("✅ 정기구독 신청 완료")
 
         # 정기구독 완료 페이지 - 주문번호 확인
         order_complete_num = get_order_number(driver, wait, "#orderCode", ui_name="결제 완료 페이지")
 
-        # 🚩 🔟 마이페이지 - 정기구독 내역 진입
+        # 🚩 [11] 마이페이지 - 정기구독 내역 진입
         fill_form_field(driver, wait, "//a[contains(text(), '마이페이지')]", None, field_type="click", ui_name="마이페이지")
         fill_form_field(driver, wait, "//a[@href='/mypage/myOrder/subscription/list']", None, field_type="click", ui_name="정기구독 내역")
 
